@@ -9,7 +9,7 @@ This survey creating program was written for my UE18CS202 project. The project w
     - SSH: `git clone git@github.com:neelkamath/thoth.git`
     - HTTPS: `git clone https://github.com/neelkamath/thoth.git`
 1. `cd thoth`
-1. `gcc *.c`
+1. `gcc -Wall *.c`
 
 ## Usage
 

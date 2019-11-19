@@ -6,6 +6,12 @@
 // Workaround for C's I/O bug. Call this after you performing an I/O operation which may leave characters behind.
 void flush();
 
+// If the <data> has a trailing newline character, it'll be removed.
+void strip(char data[DATA_SIZE]);
+
+// <prompt>s (e.g., `"Enter your name: "`) the user to enter the <data>.
+void prompt_data(char prompt[DATA_SIZE], char data[DATA_SIZE]);
+
 // Prompts the user for the survey's <name> (at most fifty characters), which will be unique in the <survey_map>.
 void prompt_survey_name(char name[DATA_SIZE], survey_map *);
 
@@ -20,9 +26,6 @@ void prompt_question(char question[DATA_SIZE], survey *);
 
 // Prompts the user for <options>.
 void prompt_options(char options[4][DATA_SIZE]);
-
-// Prompts the user to enter the <type> of <data>.
-void prompt_data(char type[DATA_SIZE], char data[DATA_SIZE]);
 
 // Returns whether the <value> is in the <values>. <values> is an array of <size> strings.
 int contains_value(char value[DATA_SIZE], int size, char values[size][DATA_SIZE]);
@@ -70,11 +73,27 @@ void flush()
         ;
 }
 
+void strip(char data[DATA_SIZE])
+{
+    if (strlen(data) > 0 && data[strlen(data) - 1] == '\n')
+        data[strlen(data) - 1] = '\0';
+}
+
+void prompt_data(char prompt[DATA_SIZE], char data[DATA_SIZE])
+{
+    do
+    {
+        printf("%s", prompt);
+        fgets(data, DATA_SIZE, stdin);
+        strip(data);
+    } while (strlen(data) == 0);
+}
+
 void prompt_survey_name(char name[DATA_SIZE], survey_map *map)
 {
     while (1)
     {
-        prompt_data("survey's name", name);
+        prompt_data("Enter the survey's name: ", name);
         if (survey_exists(map, name))
             puts("That survey already exists.");
         else
@@ -117,7 +136,7 @@ void prompt_question(char question[DATA_SIZE], survey *s)
 {
     while (1)
     {
-        prompt_data("the question", question);
+        prompt_data("Enter the question: ", question);
         if (question_exists(question, s))
             puts("That question already exists.");
         else
@@ -130,21 +149,14 @@ void prompt_options(char options[4][DATA_SIZE])
     for (int count = 0; count < 4; )
     {
         char option[DATA_SIZE];
-        printf("Enter option %d: ", count + 1);
-        scanf("%s", option);
-        flush();
+        char prompt[DATA_SIZE];
+        sprintf(prompt, "Enter option %d: ", count + 1);
+        prompt_data(prompt, option);
         if (contains_value(option, count, options))
             puts("Please enter a new option.");
         else
             strcpy(options[count++], option);
     }
-}
-
-void prompt_data(char type[DATA_SIZE], char data[DATA_SIZE])
-{
-    printf("Enter %s: ", type);
-    scanf("%s", data);
-    flush();
 }
 
 int contains_value(char value[DATA_SIZE], int size, char values[size][DATA_SIZE])
@@ -168,7 +180,7 @@ void display(survey_map *map)
     char name[DATA_SIZE];
     while (1)
     {
-        prompt_data("survey's name", name);
+        prompt_data("Enter the survey's name: ", name);
         if (!survey_exists(map, name))
             puts("That survey doesn't exist.");
         else
